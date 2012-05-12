@@ -948,7 +948,7 @@ function ds_entity_variables(&$vars) {
 
       // Add extras classes to the region.
       if (empty($layout['flexible'])) {
-        $vars[$region_name . '_classes'] = !empty($layout['settings']['classes'][$region_name]) ? ' ' . implode(' ', $layout['settings']['classes'][$region_name]) : '';
+        $vars[$region_name . '_classes'] = !empty($layout['settings']['classes'][$region_name]) ? ' ds-group ' . implode(' ', $layout['settings']['classes'][$region_name]) : ' ds-group';
       }
       // Add a wrapper to the region.
       if (empty($layout['flexible'])) {
