@@ -6,10 +6,11 @@
  */
 
 use Drupal\Core\Template\Attribute;
-use Drupal\entity\Plugin\Core\Entity;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Language\Language;
+use Drupal\entity\Plugin\Core\Entity;
+use Drupal\entity\Entity\EntityDisplay;
 
 /**
  * Implements hook_permission().
@@ -395,7 +396,7 @@ function ds_get_field_settings($entity_type, $bundle, $view_mode, $default = TRU
 function ds_get_field_value($key, $field, $entity, $view_mode, $build = array()) {
 
   $field['field_name'] = $key;
-  $field['entity'] = $entity;
+  $field['entity'] = $entity->getNGEntity();
   $field['entity_type'] = $entity->entityType();
   $field['bundle'] = $entity->bundle();
   $field['view_mode'] = $view_mode;
@@ -415,9 +416,9 @@ function ds_get_field_value($key, $field, $entity, $view_mode, $build = array())
 }
 
 /**
- * Implements hook_field_attach_view_alter().
+ * Implements ds_entity_view_alter().
  */
-function ds_field_attach_view_alter(&$build, $context) {
+function ds_entity_view_alter(&$build, EntityInterface $entity, EntityDisplay $display) {
   static $loaded_css = array();
   static $field_permissions = FALSE;
   static $loaded = FALSE;
@@ -437,16 +438,15 @@ function ds_field_attach_view_alter(&$build, $context) {
     return;
   }
 
-  $entity_type = $context['entity']->entityType();
-  $bundle = $context['entity']->bundle();
-  $view_mode = $context['view_mode'];
+  $entity_type = $entity->entityType();
+  $bundle = $entity->bundle();
+  $view_mode = $display->mode;
 
   // If no layout is configured, stop as well.
   if (!ds_get_layout($entity_type, $bundle, $view_mode)) {
     return;
   }
 
-  $entity = $context['entity'];
   $layout = ds_get_layout($entity_type, $bundle, $view_mode);
 
   // Put #entity_type, #bundle and #layout on the build so we can
