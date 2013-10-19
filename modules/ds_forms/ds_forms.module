@@ -156,6 +156,26 @@ function ds_forms_preprocess_ds_forms_custom_form(&$vars) {
 }
 
 /**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function ds_forms_theme_suggestions_ds_forms_custom_form_alter(array &$suggestions, array $variables) {
+  $form = ds_build_load($variables['form'], $variables['form']['#form_id']);
+  if (!$form) {
+    return;
+  }
+
+  $entity_type = $form->entity_type;
+  $bundle = $form->bundle;
+
+  if ($layout = ds_get_layout($entity_type, $bundle, 'form', FALSE)) {
+    // Theme hook suggestions.
+    $suggestions[] = $layout['layout'];
+    $suggestions[] = $layout['layout'] . '__' . $entity_type;
+    $suggestions[] = $layout['layout'] . '__' . $entity_type . '_' . $bundle;
+  }
+}
+
+/**
  * Render a form region.
  *
  * @param $content

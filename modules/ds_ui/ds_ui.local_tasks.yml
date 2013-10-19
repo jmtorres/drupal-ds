@@ -8,4 +8,3 @@ ds_ui.fields_task:
   title: Fields
   tab_root_id: ds.display_task
   weight: 2
-  
