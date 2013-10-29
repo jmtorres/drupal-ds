@@ -1045,6 +1045,11 @@ function ds_field_template_settings_form(array &$form, array &$form_state, array
     '#attributes' => array(
       'class' => array('ds-extras-field-template'),
     ),
+    '#ajax' => array(
+      '#submit' => array('ds_field_ui_display_overview_multistep_submit'),
+      'callback' => 'ds_field_ui_display_overview_multistep_js',
+      'wrapper' => 'field-display-overview-wrapper',
+    ),
   );
 
   // Field classes.
@@ -1150,6 +1155,20 @@ function ds_field_template_settings_form(array &$form, array &$form_state, array
   $form['ft']['lb']['#size'] = '10';
   $form['ft']['lb']['#attributes'] = array('class' => array('label-change'));
   $form['ft']['lb']['#default_value'] = isset($field_settings['lb']) ? $field_settings['lb'] : '';
+}
+
+/**
+ * Ajax handler for changing conditions on the 'Manage display' screen.
+ */
+function ds_field_ui_display_overview_multistep_js($form, &$form_state) {
+  return $form['fields'];
+}
+
+/**
+ * Form submission handler for changing conditions in field_ui_display_overview_form().
+ */
+function ds_field_ui_display_overview_multistep_submit($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
 }
 
 /**
