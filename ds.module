@@ -8,7 +8,7 @@
 use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\ds\Ds;
-use Drupal\entity\Entity\EntityDisplay;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\field\Field;
 
 /**
@@ -81,14 +81,6 @@ function ds_theme_registry_alter(&$theme_registry) {
 }
 
 /**
- * Implements ds_entity_bundle_info_alter().
- */
-function ds_entity_bundle_info_alter(&$bundles) {
-  module_load_include('inc', 'ds', 'includes/registry');
-  _ds_entity_bundle_info_alter($bundles);
-}
-
-/**
  * Implements hook_form_FORM_ID_alter().
  */
 function ds_form_field_ui_display_overview_form_alter(&$form, &$form_state) {
@@ -135,9 +127,24 @@ function ds_library_info() {
 }
 
 /**
+ * Implements hook_{ENTITY_TYPE}_presave().
+ */
+function ds_entity_display_presave($display) {
+  $display->layoutConfiguration = array();
+  $ds_layouts = Ds::getLayouts();
+  $configuration = \Drupal::config('ds.layout_settings.' . $display->id)->get();
+  if (!empty($configuration) && isset($ds_layouts[$configuration['layout']])) {
+    $layout = $ds_layouts[$configuration['layout']];
+    $layout['layout'] = $configuration['layout'];
+    $layout['settings'] = $configuration['settings'];
+    $display->layoutConfiguration = $layout;
+  }
+}
+
+/**
  * Implements hook_entity_view_alter().
  */
-function ds_entity_view_alter(&$build, EntityInterface $entity, EntityDisplay $display) {
+function ds_entity_view_alter(&$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
   static $loaded_css = array();
   static $field_permissions = FALSE;
   static $loaded = FALSE;
@@ -158,7 +165,7 @@ function ds_entity_view_alter(&$build, EntityInterface $entity, EntityDisplay $d
   }
 
   // If no layout is configured, stop as well.
-  if (!Ds::getLayout($entity_type, $bundle, $view_mode)) {
+  if (empty($display->layoutConfiguration)) {
     return;
   }
 
@@ -168,7 +175,7 @@ function ds_entity_view_alter(&$build, EntityInterface $entity, EntityDisplay $d
     $field_permissions = \Drupal::config('ds.extras')->get('field_permissions');
   }
 
-  $layout = Ds::getLayout($entity_type, $bundle, $view_mode);
+  $layout = $display->layoutConfiguration;
 
   // Put #entity_type, #bundle and #layout on the build so we can
   // access it in ds_entity_variables().
@@ -294,7 +301,7 @@ function ds_preprocess_ds_layout(&$variables) {
       }
 
       // Create region variables based on the layout settings.
-      foreach ($layout['regions'] as $region_name => $region) {
+      foreach ($layout['settings']['regions'] as $region_name => $region) {
 
         // Create the region content.
         $layout_render_array[$region_name] = array();

@@ -138,34 +138,6 @@ function _ds_theme_registry_alter(&$theme_registry) {
 }
 
 /**
- * Implements ds_entity_bundle_info_alter().
- */
-function _ds_entity_bundle_info_alter(&$bundles) {
-
-  // Add layout if configured to bundles.
-  $ds_layouts = Ds::getLayouts();
-  $ds_layout_settings = config_get_storage_names_with_prefix('ds.layout_settings');
-  foreach ($ds_layout_settings as $config) {
-    $ds_layout_setting = \Drupal::config($config)->get();
-
-    // Don't store any configurations with layouts that don't exist anymore.
-    if (!isset($ds_layouts[$ds_layout_setting['layout']])) {
-      continue;
-    }
-
-    // Make sure the entity type exists and has bundles defined.
-    if (!isset($bundles[$ds_layout_setting['entity_type']]) || !isset($bundles[$ds_layout_setting['entity_type']][$ds_layout_setting['bundle']])) {
-      continue;
-    }
-
-    $layout = $ds_layouts[$ds_layout_setting['layout']];
-    $layout['layout'] = $ds_layout_setting['layout'];
-    $layout['settings'] = $ds_layout_setting['settings'];
-    $bundles[$ds_layout_setting['entity_type']][$ds_layout_setting['bundle']]['layouts'][$ds_layout_setting['view_mode']] = $layout;
-  }
-}
-
-/**
  * Implements hook_ds_layout_info().
  */
 function _ds_ds_layout_info() {
