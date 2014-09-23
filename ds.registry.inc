@@ -332,6 +332,7 @@ function _ds_ds_layout_info() {
   if (module_exists('panels')) {
     ctools_include('plugins', 'panels');
     $panel_layouts = panels_get_layouts();
+
     foreach ($panel_layouts as $key => $layout) {
       // The easy ones.
       if (isset($layout['regions'])) {
@@ -351,8 +352,8 @@ function _ds_ds_layout_info() {
       }
       // Flexible panel layouts, ignore the default flexible.
       else {
-        if ($layout['name'] != 'flexible') {
-          $regions = panels_flexible_panels(array(), array(), $layout);
+        if (!$layout['builder']) {
+          $regions = panels_get_regions($layout, NULL);
           $layouts['panels-' . $key] = array(
             'label' => $layout['title'],
             'path' => $layout['path'],

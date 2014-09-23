@@ -843,38 +843,30 @@ function ds_entity_variables(&$vars) {
 
     // Hide empty regions variable.
     $hide_empty_regions = $layout['settings']['hide_empty_regions'];
-
     // Check if this is a flexible panels layout.
-    if (!empty($layout['flexible'])) {
+    // Template layout.
+    if (!isset($vars['classes_array'])) {
+      $vars['classes_array'] = array();
+    }
+    $vars['classes_array'][] = 'view-mode-' . $vars['elements']['#view_mode'];
+
+    // In case this is a panels layout, use panels info array.
+    if (isset($layout['module']) && $layout['module'] == 'panels') {
       ctools_include('plugins', 'panels');
-      $vars['css_id'] = $vars['settings'] = $vars['display'] =  $vars['renderer'] = '';
       $vars['layout'] = panels_get_layout($layout['panels']['name']);
-      $vars['theme_hook_suggestion'] = 'panels_flexible';
+      $layout['layout'] = $layout['panels']['theme'];
     }
-    else {
-      // Template layout.
-      if (!isset($vars['classes_array'])) {
-        $vars['classes_array'] = array();
-      }
-      $vars['classes_array'][] = 'view-mode-' . $vars['elements']['#view_mode'];
 
-      // In case this is a panels layout, use panels info array.
-      if (isset($layout['module']) && $layout['module'] == 'panels') {
-        $layout['layout'] = $layout['panels']['theme'];
-      }
-
-      $vars['theme_hook_suggestions'][] = $layout['layout'];
-      $vars['theme_hook_suggestions'][] = $layout['layout'] . '__' . $vars['elements']['#entity_type'];
-      $vars['theme_hook_suggestions'][] = $layout['layout'] . '__' . $vars['elements']['#entity_type'] . '_' . $vars['elements']['#bundle'];
-      $vars['theme_hook_suggestions'][] = $layout['layout'] . '__' . $vars['elements']['#entity_type'] . '_' . $vars['elements']['#bundle'] . '_' . $vars['elements']['#view_mode'];
-    }
+    $vars['theme_hook_suggestions'][] = $layout['layout'];
+    $vars['theme_hook_suggestions'][] = $layout['layout'] . '__' . $vars['elements']['#entity_type'];
+    $vars['theme_hook_suggestions'][] = $layout['layout'] . '__' . $vars['elements']['#entity_type'] . '_' . $vars['elements']['#bundle'];
+    $vars['theme_hook_suggestions'][] = $layout['layout'] . '__' . $vars['elements']['#entity_type'] . '_' . $vars['elements']['#bundle'] . '_' . $vars['elements']['#view_mode'];
 
     // Allow modules to alter the region layout before it is rendered.
     drupal_alter('ds_regions', $layout, $vars[$object]);
 
     // Create region variables based on the layout settings.
     foreach ($layout['regions'] as $region_name => $region) {
-
       // Create the region content.
       $vars[$region_name] = ds_render_region($vars[$render_container], $region_name, $layout);
 
